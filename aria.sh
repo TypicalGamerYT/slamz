@@ -1,6 +1,6 @@
 export MAX_DOWNLOAD_SPEED=0
-tracker_list=$(curl -Ns https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt | awk '$1' | tr '\n' ',')
-export MAX_CONCURRENT_DOWNLOADS=7
+tracker_list=$(curl -Ns https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt --next https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all_aria2.txt --next https://ngosang.github.io/trackerslist/trackers_all_http.txt --next https://newtrackon.com/api/all --next https://raw.githubusercontent.com/DeSireFire/animeTrackerList/master/AT_all.txt | awk '$1' | tr '\n\n' ',')
+export MAX_CONCURRENT_DOWNLOADS=8
 
 aria2c --enable-rpc --rpc-listen-all=false --rpc-listen-port 6800 --check-certificate=false \
    --max-connection-per-server=10 --rpc-max-request-size=1024M \

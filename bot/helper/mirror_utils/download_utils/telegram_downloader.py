@@ -2,10 +2,7 @@ import logging
 import threading
 import time
 
-from pyrogram import Client
-
-from bot import LOGGER, download_dict, download_dict_lock, TELEGRAM_API, \
-    TELEGRAM_HASH, USER_SESSION_STRING
+from bot import LOGGER, download_dict, download_dict_lock, app
 from .download_helper import DownloadHelper
 from ..status_utils.telegram_download_status import TelegramDownloadStatus
 
@@ -23,10 +20,7 @@ class TelegramDownloadHelper(DownloadHelper):
         self.__name = ""
         self.__gid = ''
         self.__start_time = time.time()
-        self._bot = Client(api_id=TELEGRAM_API,
-                                 api_hash=TELEGRAM_HASH,
-                                 session_name=USER_SESSION_STRING)
-        self._bot.start()
+        self.__bot = app
         self.__is_cancelled = False
 
     @property
@@ -53,7 +47,7 @@ class TelegramDownloadHelper(DownloadHelper):
     def __onDownloadProgress(self, current, total):
         if self.__is_cancelled:
             self.__onDownloadError('Cancelled by user!')
-            self._bot.stop_transmission()
+            self.__bot.stop_transmission()
             return
         with self.__resource_lock:
             self.downloaded_bytes = current
@@ -76,7 +70,7 @@ class TelegramDownloadHelper(DownloadHelper):
         self.__listener.onDownloadComplete()
 
     def __download(self, message, path):
-        download = self._bot.download_media(message,
+        download = self.__bot.download_media(message,
                                                   progress=self.__onDownloadProgress, file_name=path)
         if download is not None:
             self.__onDownloadComplete()
@@ -85,7 +79,7 @@ class TelegramDownloadHelper(DownloadHelper):
                 self.__onDownloadError('Internal error occurred')
 
     def add_download(self, message, path, filename):
-        _message = self._bot.get_messages(message.chat.id, message.message_id)
+        _message = self.__bot.get_messages(message.chat.id, message.message_id)
         media = None
         media_array = [_message.document, _message.video, _message.audio]
         for i in media_array:

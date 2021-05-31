@@ -1,11 +1,18 @@
-from telegram import InlineKeyboardMarkup
+from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackQueryHandler
 from telegram.message import Message
 from telegram.update import Update
 import psutil, shutil
 import time
-from bot import AUTO_DELETE_MESSAGE_DURATION, LOGGER, bot, \
+from bot import dispatcher, AUTO_DELETE_MESSAGE_DURATION, LOGGER, bot, \
     status_reply_dict, status_reply_dict_lock, download_dict, download_dict_lock
-from bot.helper.ext_utils.bot_utils import get_readable_message, get_readable_file_size, MirrorStatus
+from bot import botStartTime
+
+import pytz
+import datetime
+from datetime import datetime
+
+from bot.helper.ext_utils.bot_utils import get_readable_message, get_readable_file_size, get_readable_time, MirrorStatus
 from telegram.error import TimedOut, BadRequest
 
 
@@ -65,15 +72,17 @@ def delete_all_messages():
             except Exception as e:
                 LOGGER.error(str(e))
 
+now=datetime.now(pytz.timezone('Asia/Jakarta'))
 
 def update_all_messages():
     total, used, free = shutil.disk_usage('.')
+    total = get_readable_file_size(total)
     used = get_readable_file_size(used)
     free = get_readable_file_size(free)
     msg = get_readable_message()
-    msg += f"<b>💻CPU : </b> {psutil.cpu_percent()}%" \
-           f" <b>💽RAM : </b> {psutil.virtual_memory().percent}%" \
-           f" <b>📝DISK : </b> {psutil.disk_usage('/').percent}%"
+    msg += f"<b>💻CPU : </b> <code>{psutil.cpu_percent()}% </code>" \
+           f" <b>💽RAM : </b> <code>{psutil.virtual_memory().percent}% </code>" \
+           f" <b>📝DISK : </b> <code>{psutil.disk_usage('/').percent}%</code>"
     with download_dict_lock:
         dlspeed_bytes = 0
         uldl_bytes = 0
@@ -91,27 +100,47 @@ def update_all_messages():
                     uldl_bytes += float(speedy.split('M')[0]) * 1048576
         dlspeed = get_readable_file_size(dlspeed_bytes)
         ulspeed = get_readable_file_size(uldl_bytes)
-        msg += f"\n\n<b>Used Space : </b> {used} | <b>Free Space : </b> {free}\n\n<b>Download Speed : </b> {dlspeed}ps 🔻 | <b>Upload Speed :</b> {ulspeed}ps 🔺\n"
+        currentTime = get_readable_time((time.time() - botStartTime))
+        current = now.strftime('%Y/%m/%d %I:%M:%S %p')
+        sent = get_readable_file_size(psutil.net_io_counters().bytes_sent)
+        recv = get_readable_file_size(psutil.net_io_counters().bytes_recv)
+        msg += f"\n\n<b>Total :</b> <code>{total}</code> | <b>Used : </b> <code>{used}</code> | <b>Free : </b> <code>{free}</code>\n\n<b>DL Speed : </b> <code>{dlspeed}ps</code> 🔻 | <b>UL Speed :</b> <code>{ulspeed}ps</code> 🔺\n<b>Total DOWN 🔻 :</b> <code>{recv}</code> | <b>Total UP 🔺 : </b> <code>{sent}</code>\n\n<b>Bot Uptime ⌚:</b> <code>{currentTime}</code> | <b>Bot Start 👨‍💻:</b> <code>{current}</code>"
     with status_reply_dict_lock:
         for chat_id in list(status_reply_dict.keys()):
             if status_reply_dict[chat_id] and msg != status_reply_dict[chat_id].text:
                 if len(msg) == 0:
-                    msg = "Starting Download..."
+                    msg = "Starting Download..." #sendeMessage("Starting Download...", status_reply_dict[chat_id])
                 try:
-                    editMessage(msg, status_reply_dict[chat_id])
+                    keyboard = [[InlineKeyboardButton("🔄 REFRESH 🔄", callback_data=str(ONE)),
+                                 InlineKeyboardButton("❌ CLOSE ❌", callback_data=str(TWO)),]]
+                    editMessage(msg, status_reply_dict[chat_id], reply_markup=InlineKeyboardMarkup(keyboard))
                 except Exception as e:
                     LOGGER.error(str(e))
                 status_reply_dict[chat_id].text = msg
 
+ONE, TWO = range(2)
+
+def refresh(update, context):
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(text="Refreshing...")
+    time.sleep(2)
+    update_all_messages()
+
+def close(update, context):
+    query = update.callback_query
+    query.answer()
+    delete_all_messages()
 
 def sendStatusMessage(msg, bot):
     total, used, free = shutil.disk_usage('.')
+    total = get_readable_file_size(total)
     used = get_readable_file_size(used)
     free = get_readable_file_size(free)
     progress = get_readable_message()
-    progress += f"<b>💻CPU : </b> {psutil.cpu_percent()}%" \
-           f" <b>💽RAM : </b> {psutil.virtual_memory().percent}%" \
-           f" <b>📝DISK : </b> {psutil.disk_usage('/').percent}%"
+    progress += f"<b>💻CPU : </b> <code>{psutil.cpu_percent()}% </code>" \
+           f" <b>💽RAM : </b> <code>{psutil.virtual_memory().percent}% </code>" \
+           f" <b>📝DISK : </b> <code>{psutil.disk_usage('/').percent}%</code>"
     with download_dict_lock:
         dlspeed_bytes = 0
         uldl_bytes = 0
@@ -129,7 +158,11 @@ def sendStatusMessage(msg, bot):
                     uldl_bytes += float(speedy.split('M')[0]) * 1048576
         dlspeed = get_readable_file_size(dlspeed_bytes)
         ulspeed = get_readable_file_size(uldl_bytes)
-        progress += f"\n\n<b>Used Space : </b> {used} | <b>Free Space : </b> {free}\n\n<b>Download Speed : </b> {dlspeed}ps 🔻 | <b>Upload Speed :</b> {ulspeed}ps 🔺\n"
+        currentTime = get_readable_time((time.time() - botStartTime))
+        current = now.strftime('%Y/%m/%d %I:%M:%S %p')
+        sent = get_readable_file_size(psutil.net_io_counters().bytes_sent)
+        recv = get_readable_file_size(psutil.net_io_counters().bytes_recv)
+        progress += f"\n\n<b>Total :</b> <code>{total}</code> | <b>Used : </b> <code>{used}</code> | <b>Free : </b> <code>{free}</code>\n<b>DL Speed : </b> <code>{dlspeed}ps</code> 🔻 | <b>UL Speed :</b> <code>{ulspeed}ps</code> 🔺\n<b>Total DOWN 🔻 :</b> <code>{recv}</code> | <b>Total UP 🔺 : </b> <code>{sent}</code>\n\n<b>Bot Uptime ⌚:</b> <code>{currentTime}</code> | <b>Bot Start 👨‍💻:</b> <code>{current}</code>"
     with status_reply_dict_lock:
         if msg.message.chat.id in list(status_reply_dict.keys()):
             try:
@@ -141,3 +174,6 @@ def sendStatusMessage(msg, bot):
                 del status_reply_dict[msg.message.chat.id]
         message = sendMessage(progress, bot, msg)
         status_reply_dict[msg.message.chat.id] = message
+
+dispatcher.add_handler(CallbackQueryHandler(refresh, pattern='^' + str(ONE) + '$'))
+dispatcher.add_handler(CallbackQueryHandler(close, pattern='^' + str(TWO) + '$'))

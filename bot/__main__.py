@@ -1,28 +1,36 @@
 import shutil, psutil
 import signal
-import pickle
+import importlib
+
 from pyrogram import idle
-import platform
-from platform import python_version
+
 from bot import app
-from os import execl, kill, path, remove
+
 from sys import executable
 from datetime import datetime
 import pytz
 import datetime
 from datetime import datetime
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, __version__
+from telegram import ParseMode, BotCommand, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CommandHandler, run_async
-from bot import dispatcher, updater, botStartTime, AUTHORIZED_CHATS, IMAGE_URL
+from bot import bot, dispatcher, updater, botStartTime, AUTHORIZED_CHATS, IMAGE_URL
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
 from .helper.telegram_helper.filters import CustomFilters
-from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, anime, stickers, search, delete, speedtest, usage, gtranslator, paste
+from bot.modules import ALL_MODULES
+from bot.plugins import ALL_PLUGINS
+
+for module in ALL_MODULES:
+    imported_module = importlib.import_module("bot.modules." + module)
+    importlib.reload(imported_module)
+
+for plugins in ALL_PLUGINS:
+    imported_plugins = importlib.import_module("bot.plugins." + module)
+    importlib.reload(imported_plugins)
 
 now=datetime.now(pytz.timezone('Asia/Jakarta'))
-
 
 @run_async
 def stats(update, context):
@@ -54,166 +62,81 @@ def stats(update, context):
 @run_async
 def start(update, context):
     start_string = f'''
-This bot can mirror all your links to Google drive!
-Type /{BotCommands.HelpCommand} to get a list of available commands
+Hello {update.message.chat.first_name}, this bot can help you mirror all your links to Google drive!
+Type /{BotCommands.HelpCommand} to get a list of available commands.
 '''
-    update.effective_message.reply_photo(IMAGE_URL, start_string, parse_mode=ParseMode.MARKDOWN)
-
-
-@run_async
-def chat_list(update, context):
-    chatlist =''
-    chatlist += '\n'.join(str(id) for id in AUTHORIZED_CHATS)
-    sendMessage(f'<b>======[ AUTHORIZED LIST ]======</b>\n<code>{chatlist}</code>\n', context.bot, update)
-
-
-@run_async
-def repo(update, context):
-    repo_string = '''
-𝙒𝙚 𝘾𝙪𝙧𝙧𝙚𝙣𝙩𝙡𝙮 𝙃𝙖𝙙 𝙂𝙧𝙤𝙪𝙥𝙨 
-𝙃𝙚𝙧𝙚 𝙄𝙛 𝙔𝙤𝙪 𝙒𝙖𝙣𝙩 𝙏𝙤 𝙅𝙤𝙞𝙣 😎?
-𝘿𝙤𝙣'𝙩 𝙛𝙤𝙧𝙜𝙚𝙩 𝙩𝙤 𝙛𝙤𝙡𝙡𝙤𝙬 𝙤𝙪𝙧 𝙘𝙝𝙖𝙣𝙣𝙚𝙡 💢
-
-- 𝙊𝙬𝙣𝙚𝙧
-'''
-    button = [
-    [InlineKeyboardButton("🔱 𝘾𝙝𝙖𝙣𝙣𝙚𝙡 🔱", url=f"https://t.me/Jusidama")],
-    [InlineKeyboardButton("🔱 𝙂𝙧𝙤𝙪𝙥 1 🔱", url=f"https://t.me/joinchat/SNDQh7vYDkr5q1H5")],
-    [InlineKeyboardButton("🔱 𝙂𝙧𝙤𝙪𝙥 2 🔱", url=f"https://t.me/joinchat/Ml7dMhQ9xTTOKbbwL6FiEg")]]
-    reply_markup = InlineKeyboardMarkup(button)
-    update.effective_message.reply_photo(IMAGE_URL, repo_string, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
-
+    LOGGER.info('UID: {} - UN: {} - MSG: {}'.format(update.message.chat.id,update.message.chat.username,update.message.text))
+    if CustomFilters.authorized_user(update) or CustomFilters.owner_filter(update) or CustomFilters.sudo_user(update):
+        if update.message.chat.type == "private" :
+            sendMessage(f"Hey I'm alive :)\n\n Chat ID : <code>{update.message.chat.id}</code>", context.bot, update)
+        else :
+            update.effective_message.reply_photo(IMAGE_URL, start_string, parse_mode=ParseMode.MARKDOWN)
+    else :
+        sendMessage(f"Oops! {update.message.chat.first_name}, you are not a authorized user.", context.bot, update)
 
 @run_async
 def restart(update, context):
-    restart_message = sendMessage("Restarting, Please wait!", context.bot, update)
+    LOGGER.info('UID: {} - UN: {} - MSG: {}'.format(update.message.chat.id,update.message.chat.username,update.message.text))
+    restart_message = sendMessage("<b>🔁 Restarting... Please wait! 🔁</b>", context.bot, update)
     LOGGER.info(f'Restarting the Bot...')
     # Save restart message object in order to reply to it after restarting
+    with open(".restartmsg", "w") as f:
+        f.truncate(0)
+        f.write(f"{restart_message.chat.id}\n{restart_message.message_id}\n")
     fs_utils.clean_all()
-    with open('restart.pickle', 'wb') as status:
-        pickle.dump(restart_message, status)
-    execl(executable, executable, "-m", "bot")
-
-
-@run_async
-def ping(update, context):
-    start_time = int(round(time.time() * 1000))
-    reply = sendMessage("Starting Ping", context.bot, update)
-    end_time = int(round(time.time() * 1000))
-    editMessage(f'{end_time - start_time} ms', reply)
+    os.execl(executable, executable, "-m", "bot")
 
 
 @run_async
 def log(update, context):
     sendLogFile(context.bot, update)
 
-@run_async
-def systemstats(update, context):
-    uname = platform.uname()
-    system = platform.system()
-    
-    code = f'<b>======[ SYSTEM INFO ]======</b>\n\n' \
-             f'<b>System:</b> <code>' + str(uname.system) + '</code>\n' \
-             f'<b>Node name:</b> <code>' + str(uname.node) + '</code>\n' \
-             f'<b>Release:</b> <code>' + str(uname.release) + '</code>\n' \
-             f'<b>Version:</b> <code>' + str(uname.version) + '</code>\n' \
-             f'<b>Machine:</b> <code>' + str(uname.machine) + '</code>\n' \
-             f'<b>Processor:</b> <code>' + str(uname.processor) + '</code>\n' \
-             f'<b>Python version:</b> <code>' + python_version() + '</code>\n' \
-             f'<b>Library version:</b> <code>' + str(__version__) + '</code>\n'
-    context.bot.sendMessage(
-        update.effective_chat.id, code, parse_mode=ParseMode.HTML
-       )
-    update.effective_message.reply_photo(IMAGE_URL, code, parse_mode=ParseMode.HTML)
-    
-@run_async
-def bot_help(update, context):
-    help_string = f'''
-/{BotCommands.HelpCommand}: To get this message
-
-/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to google drive
-
-/{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to google drive
-
-/{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
-
-/{BotCommands.CloneCommand}: Copy file/folder to google drive
-
-/{BotCommands.WatchCommand} [youtube-dl supported link]: Mirror through youtube-dl. Click /{BotCommands.WatchCommand} for more help.
-
-/{BotCommands.TarWatchCommand} [youtube-dl supported link]: Mirror through youtube-dl and tar before uploading
-
-/{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
-
-/{BotCommands.StatusCommand}: Shows a status of all the downloads
-
-/{BotCommands.ListCommand} [search term]: Searches the search term in the Google drive, if found replies with the link
-
-/{BotCommands.StatsCommand}: Show Stats of the machine the bot is hosted on
-
-/{BotCommands.AuthorizeCommand}: Authorize a chat or a user to use the bot (Can only be invoked by owner of the bot)
-
-/{BotCommands.AuthListCommand}: See Authorized list (Can only be invoked by owner of the bot)
-
-/{BotCommands.LogCommand}: Get a log file of the bot. Handy for getting crash reports
-
-/{BotCommands.UsageCommand}: To see Heroku Dyno Stats (Owner only).
-
-/{BotCommands.SpeedCommand}: Check Internet Speed of the Host
-
-/{BotCommands.RepoCommand}: Get the bot repo.
-
-/{BotCommands.SystemstatsCommand} : Get system information for this bot.
-
-/{BotCommands.TotranslateCommand} : Translating message with listed code.
-
-/{BotCommands.PasteCommand} : Paste a word to neko.bin from message.
-
-/tshelp: Get help for torrent search module.
-
-/weebhelp: Get help for anime, manga and character module.
-
-/stickerhelp: Get help for stickers module.
-'''
-    sendMessage(help_string, context.bot, update)
-
+botcmds = [
+BotCommand(f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
+BotCommand(f'{BotCommands.TarMirrorCommand}','Upload tar (zipped) file'),
+BotCommand(f'{BotCommands.UnzipMirrorCommand}','Extract files'),
+BotCommand(f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
+BotCommand(f'{BotCommands.WatchCommand}','Mirror YT-DL support link'),
+BotCommand(f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as tar'),
+BotCommand(f'{BotCommands.CancelMirror}','Cancel a task'),
+BotCommand(f'{BotCommands.CancelAllCommand}','Cancel all tasks'),
+BotCommand(f'{BotCommands.DeleteCommand}','Delete file from Drive'),
+BotCommand(f'{BotCommands.ListCommand}',' [query] Searches files in G-Drive'),
+BotCommand(f'{BotCommands.StatusCommand}','Get Mirror Status message'),
+BotCommand(f'{BotCommands.StatsCommand}','Bot Usage Stats'),
+BotCommand(f'{BotCommands.HelpCommand}','Get Detailed Help'),
+BotCommand(f'{BotCommands.SpeedCommand}','Check Speed of the host'),
+BotCommand(f'{BotCommands.LogCommand}','Bot Log [owner only]'),
+BotCommand(f'{BotCommands.RestartCommand}','Restart bot [owner only]'),
+BotCommand(f'{BotCommands.RepoCommand}','Get the group info'),
+BotCommand(f'{BotCommands.TotranslateCommand}','Translating message with listed code.'),
+BotCommand(f'{BotCommands.PasteCommand}','Paste a word to neko.bin from message.'),
+BotCommand(f'{BotCommands.SearchHelpCommand}','Get help for torrent search module.'),
+BotCommand(f'{BotCommands.WeebHelpCommand}','Get help for anime, manga and character module.'),
+BotCommand(f'{BotCommands.StickerHelpCommand}','Get help for stickers module.')]
 
 def main():
+    current = now.strftime('%Y/%m/%d %I:%M:%P')
     fs_utils.start_cleanup()
     # Check if the bot is restarting
-    if path.exists('restart.pickle'):
-        with open('restart.pickle', 'rb') as status:
-            restart_message = pickle.load(status)
-        restart_message.edit_text("Restarted Successfully!")
-        LOGGER.info('Restarted Successfully!')
-        remove('restart.pickle')
+    if os.path.isfile(".restartmsg"):
+        with open(".restartmsg") as f:
+            chat_id, msg_id = map(int, f)
+        bot.edit_message_text(f"Restarted Successfully !\n"f"\nBot Start : {current}", chat_id, msg_id)
+        os.remove(".restartmsg")
 
     start_handler = CommandHandler(BotCommands.StartCommand, start,
                                    filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
-    ping_handler = CommandHandler(BotCommands.PingCommand, ping,
-                                  filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
     restart_handler = CommandHandler(BotCommands.RestartCommand, restart,
                                      filters=CustomFilters.owner_filter)
-    help_handler = CommandHandler(BotCommands.HelpCommand,
-                                  bot_help, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
     stats_handler = CommandHandler(BotCommands.StatsCommand,
                                    stats, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
     log_handler = CommandHandler(BotCommands.LogCommand, log, filters=CustomFilters.owner_filter)
-    repo_handler = CommandHandler(BotCommands.RepoCommand, repo,
-                                   filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
-    authlist_handler = CommandHandler(BotCommands.AuthListCommand, chat_list, filters=CustomFilters.owner_filter)
-    system_handler = CommandHandler(BotCommands.SystemstatsCommand, systemstats,
-                                    filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
     
     dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(ping_handler)
     dispatcher.add_handler(restart_handler)
-    dispatcher.add_handler(help_handler)
     dispatcher.add_handler(stats_handler)
     dispatcher.add_handler(log_handler)
-    dispatcher.add_handler(repo_handler)
-    dispatcher.add_handler(authlist_handler)
-    dispatcher.add_handler(system_handler)
     
     updater.start_polling()
     LOGGER.info("Bot Started!")

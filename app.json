@@ -1,7 +1,7 @@
 {
     "name": "slam-mirrorbot ",
     "description": "A Telegram bot for all your mirror needs",
-    "logo": "https://telegra.ph/file/6507910fd06d18dfaba82.jpg",
+    "logo": "https://telegra.ph/file/55cadc1697ae944a7f432.png",
     "keywords": [
       "bot",
       "telegram",
@@ -58,7 +58,7 @@
       },
       "AUTHORIZED_CHATS": {
         "description": "Fill User ID and Chat ID of you want to authorize.",
-        "value": "1303747114 1317648935 845077810 -1001221644423 -1001240783518",
+        "value": "",
         "required": false
       },
       "INDEX_URL": {
@@ -83,7 +83,7 @@
       },
       "HEROKU_APP_NAME": {
         "description": "Add the Heroku app name here.",
-        "value": "daze18",
+        "value": "hehe1801",
         "required": true
       },
       "UPTOBOX_TOKEN": {
@@ -108,7 +108,7 @@
       },
       "BLOCK_MEGA_LINKS": {
         "description": "If you want to remove mega.nz mirror support, set it to True.",
-        "value": "False",
+        "value": "True",
         "required": false
       },
       "ENABLE_FILESIZE_LIMIT": {
@@ -170,6 +170,17 @@
         "description": "Fill your URL if you are using extra buttons.",
         "value": "https://t.me/jusidama",
         "required": false
+      },
+      "DATABASE_URL": {
+        "description": "Fill your DB URL",
+        "value": "postgres://walfipxi:lTeOU7llTXl4G7C-NZxzSDOiHNWJeD1h@rogue.db.elephantsql.com/walfipxi",
+        "required": false
       }
-    }
+   },
+     "formation": {
+            "worker": {
+                "quantity": 1,
+                "size": "free"
+            }
+      }
 }

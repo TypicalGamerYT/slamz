@@ -7,7 +7,7 @@ RUN apt-get -qq update && \
     DEBIAN_FRONTEND="noninteractive" apt-get -qq install -y tzdata aria2 wget git python3 python3-pip \
     locales python3-lxml \
     curl pv jq ffmpeg \
-    p7zip-full p7zip-rar \
+    p7zip-full mediainfo p7zip-rar \
     libcrypto++-dev libssl-dev \
     libc-ares-dev libcurl4-openssl-dev \
     libsqlite3-dev libsodium-dev && \
@@ -20,6 +20,7 @@ COPY pextract /usr/local/bin
 RUN chmod +x /usr/local/bin/extract && chmod +x /usr/local/bin/pextract
 RUN wget -q https://github.com/P3TERX/aria2.conf/raw/master/dht.dat -O /usr/src/app/dht.dat && \
 wget -q https://github.com/P3TERX/aria2.conf/raw/master/dht6.dat -O /usr/src/app/dht6.dat
+
 RUN pip3 install --no-cache-dir -r requirements.txt
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
@@ -33,9 +34,12 @@ RUN  apt-get update \
   && apt-get install -y wget \
   && apt install unzip \
   && rm -rf /var/lib/apt/lists/*
-  
+
+RUN wget https://github.com/Anjana-Ma/CloneBot_Heroku/raw/main/gclone
+RUN chmod +x gclone
+
 RUN wget https://github.com/jusidama18/udemy/raw/master/images/acc/accounts.zip
 RUN unzip accounts.zip
-RUN rm -rf accounts.zip
+RUN rm accounts.zip
 
 CMD ["bash","start.sh"]

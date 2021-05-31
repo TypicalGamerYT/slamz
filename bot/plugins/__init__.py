@@ -1,9 +1,9 @@
 '''Methods Directory.'''
 
-def __list_all_modules():
+def __list_all_plugins():
     from os.path import dirname, basename, isfile
     import glob
-    # This generates a list of modules in this folder for the * in __main__ to work.
+    # This generates a list of plugins in this folder for the * in __main__ to work.
     mod_paths = glob.glob(dirname(__file__) + "/*.py")
     return [
         basename(f)[:-3] for f in mod_paths if isfile(f)
@@ -12,5 +12,5 @@ def __list_all_modules():
         ]
 
 
-ALL_MODULES = sorted(__list_all_modules())
-__all__ = ALL_MODULES + ["ALL_MODULES"]
+ALL_PLUGINS = sorted(__list_all_modules())
+__all__ = ALL_PLUGINS + ["ALL_PLUGINS"]

@@ -11,6 +11,12 @@ from dotenv import load_dotenv
 from pyrogram import Client
 from telegraph import Telegraph
 
+from Python_ARQ import ARQ
+from aiohttp import ClientSession
+
+import psycopg2
+from psycopg2 import Error
+
 import socket
 import faulthandler
 faulthandler.enable()
@@ -32,9 +38,64 @@ load_dotenv('config.env')
 
 Interval = []
 
+ARQ_API_URL = "https://thearq.tech" #Default URL.
+ARQ_API_KEY = "MUTWXW-IOSFCI-AYCOHO-KXJNLI-ARQ" #Get this from @ARQRobot.
+
+DRIVE_NAME = [
+    "Current Drive",
+    "Main Data 0",  # folder 1 name
+    "Main Data 1",  # folder 2 name
+    "Main Data 2",  # folder 3 name
+    "Main Data 3",  # ....
+    "Main Data 4",  # ......
+    "Main Data 5",
+    "Aulia Index"  # and soo onnnn folder n names
+]
+
+DRIVE_ID = [
+    "0AEi4wTsML7qxUk9PVA",
+    "1sQOTUg0OrRh-WY8JoLNgYmdePE0oLjSN",  # folder 1 id
+    "1uODcU-1OWCmKZ40XxNkzeJvR3VlVtoSY",  # folder 2 id
+    "10Mujqdc8qdVW1JYpv7zIDkFvrn3-X2Vr",  # and so onn... folder n id
+    "18p8QAbCfqNPXNGkyWqOP2IsI31Q5y5Hi",
+    "1vgabcaxjP96H87v12HOg3iFCP-ioN6wb",
+    "1ya7SyXL1yjXltR-B8BPAw8YBNywnCE1h",
+    "13k-FjJJvfR_Btcwd10zEOmqMEUl5bVlw"
+]
+
+INDEX_URLS = [
+    "https://database.juicedama.workers.dev/7:",
+    "https://md5.juicedama.workers.dev/0:",  # folder 1 index link
+    "https://md5.juicedama.workers.dev/1:",  # folder 2 index link
+    "https://md5.juicedama.workers.dev/2:",  # and soo on folder n link
+    "https://md5.juicedama.workers.dev/3:",
+    "https://md5.juicedama.workers.dev/4:",
+    "https://md5.juicedama.workers.dev/5:",
+    "https://auliachan.crysriski12.workers.dev/0:"
+]
+
+# Aiohttp Client
+print("[INFO]: INITIALZING AIOHTTP SESSION")
+aiohttpsession = ClientSession()
+
+# ARQ client
+print("[INFO]: INITIALIZING ARQ")
+arq = ARQ(ARQ_API_URL, ARQ_API_KEY, aiohttpsession)
 
 def getConfig(name: str):
     return os.environ[name]
+
+def mktable():
+    try:
+        conn = psycopg2.connect(DB_URI)
+        cur = conn.cursor()
+        sql = "CREATE TABLE users (uid bigint, sudo boolean DEFAULT FALSE);"
+        cur.execute(sql)
+        conn.commit()
+        LOGGER.info("Table Created!")
+    except Error as e:
+        LOGGER.error(e)
+        exit(1)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -67,12 +128,7 @@ status_reply_dict = {}
 download_dict = {}
 # Stores list of users and chats the bot is authorized to use in
 AUTHORIZED_CHATS = set()
-if os.path.exists('authorized_chats.txt'):
-    with open('authorized_chats.txt', 'r+') as f:
-        lines = f.readlines()
-        for line in lines:
-            #    LOGGER.info(line.split())
-            AUTHORIZED_CHATS.add(int(line.split()[0]))
+SUDO_USERS = set()
 try:
     achats = getConfig('AUTHORIZED_CHATS')
     achats = achats.split(" ")
@@ -83,9 +139,10 @@ except:
 
 try:
     BOT_TOKEN = getConfig('BOT_TOKEN')
+    DB_URI = os.environ.get("DATABASE_URL")
     parent_id = getConfig('GDRIVE_FOLDER_ID')
     DOWNLOAD_DIR = getConfig('DOWNLOAD_DIR')
-    if DOWNLOAD_DIR[-1] != '/' or DOWNLOAD_DIR[-1] != '\\':
+    if not DOWNLOAD_DIR.endswith("/"):
         DOWNLOAD_DIR = DOWNLOAD_DIR + '/'
     DOWNLOAD_STATUS_UPDATE_INTERVAL = int(getConfig('DOWNLOAD_STATUS_UPDATE_INTERVAL'))
     OWNER_ID = int(getConfig('OWNER_ID'))
@@ -96,9 +153,28 @@ except KeyError as e:
     LOGGER.error("One or more env variables missing! Exiting now")
     exit(1)
 
+try:
+    conn = psycopg2.connect(DB_URI)
+    cur = conn.cursor()
+    sql = "SELECT * from users;"
+    cur.execute(sql)
+    rows = cur.fetchall()  #returns a list ==> (uid, sudo)
+    for row in rows:
+        AUTHORIZED_CHATS.add(row[0])
+        if row[1]:
+            SUDO_USERS.add(row[0])
+except Error as e:
+    if 'relation "users" does not exist' in str(e):
+        mktable()
+    else:
+        LOGGER.error(e)
+        exit(1)
+finally:
+    cur.close()
+    conn.close()
+
 LOGGER.info("Generating USER_SESSION_STRING")
-with Client(':memory:', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN) as app:
-    USER_SESSION_STRING = app.export_session_string()
+app = Client(':memory:', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN)
 
 #Generate Telegraph Token
 sname = ''.join(random.SystemRandom().choices(string.ascii_letters, k=8))
