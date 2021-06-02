@@ -496,7 +496,7 @@ class GoogleDriveHelper:
         LOGGER.info("Created Google-Drive Folder:\nName: {}\nID: {} ".format(file.get("name"), file_id))
         return file_id
 
-        @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(15),
+    @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(15),
            retry=retry_if_exception_type(HttpError), before=before_log(LOGGER, logging.DEBUG))
     def check_folder_exists(self, fileName, u_parent_id):
         fileName = clean_name(fileName)
