@@ -31,6 +31,10 @@ logging.getLogger('googleapiclient.discovery').setLevel(logging.ERROR)
 SERVICE_ACCOUNT_INDEX = 0
 TELEGRAPHLIMIT = 95
 
+def clean_name(name):
+    name = name.replace("'", "\\'")
+    return name
+
 class GoogleDriveHelper:
     def __init__(self, name=None, listener=None, GFolder_ID=parent_id):
         self.__G_DRIVE_TOKEN_FILE = "token.pickle"

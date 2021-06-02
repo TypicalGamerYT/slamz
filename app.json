@@ -68,12 +68,12 @@
       },
       "TELEGRAM_API": {
         "description": "This is to authenticate to your telegram account for downloading Telegram files. You can get this from https://my.telegram.org.",
-        "value": "",
+        "value": "3298209",
         "required": true
       },
       "TELEGRAM_HASH": {
         "description": "This is to authenticate to your telegram account for downloading Telegram files. You can get this from https://my.telegram.org.",
-        "value": "",
+        "value": "8e49de266ea0fa53156a728692d2ee64",
         "required": true
       },
       "HEROKU_API_KEY": {

@@ -603,7 +603,7 @@ class GoogleDriveHelper:
             INDEX += 1          
             if response:
                 if add_title_msg == True:
-                    msg = f'<h4><img src="{IMAGE_URL}" />🔎 Sᴇᴀʀᴄʜ Rᴇsᴜʟᴛs Fᴏʀ Yᴏᴜʀ Kᴇʏᴡᴏʀᴅ : {fileName}</h4><br><b><a href="https://t.me/jusidama">@Jusidama #Search-Index</a></b><br><br><b><a href="https://groups.google.com/g/jusidama-folder">Join Our Team Drive</a> | <a href="https://index.juicedama.workers.dev">Index Multi Drive</a></b><br><br>'
+                    msg = f'<h4><img src="{IMAGE_URL}" />🔎 Search Results for : {fileName}</h4>\n<b><a href="https://t.me/jusidama">@Jusidama #Search-Index</a></b>\n\n<b><a href="https://groups.google.com/g/jusidama-folder">Join Our Team Drive</a> | <a href="https://index.juicedama.workers.dev">Index Multi Drive</a></b>\n\n'
                     add_title_msg = False
                 msg += f"╾────────────╼<br><b>{DRIVE_NAMES[INDEX]}</b><br>╾────────────╼<br>"
                 for file in response:
@@ -612,41 +612,41 @@ class GoogleDriveHelper:
                         msg += f"⁍<code>{file.get('name')}<br>(folder)📁</code><br>"
                         if SHORTENER is not None and SHORTENER_API is not None:
                             sfurl = requests.get('https://{}/api?api={}&url={}&format=text'.format(SHORTENER, SHORTENER_API, furl)).text
-                            msg += f"<b><a href={sfurl}>Dʀɪᴠᴇ Lɪɴᴋ</a></b>"
+                            msg += f"<b><a href={sfurl}>Drive Link</a></b>"
                         else:
-                            msg += f"<b><a href={furl}>Dʀɪᴠᴇ Lɪɴᴋ</a></b>"
+                            msg += f"<b><a href={furl}>Drive Link</a></b>"
                         if INDEX_URLS[INDEX] is not None:
                             url_path = requests.utils.quote(f'{file.get("name")}')
                             url = f'{INDEX_URLS[INDEX]}/{url_path}/'
                             if SHORTENER is not None and SHORTENER_API is not None:
                                 siurl = requests.get('https://{}/api?api={}&url={}&format=text'.format(SHORTENER, SHORTENER_API, url)).text
-                                msg += f' <b>| <a href="{siurl}">Iɴᴅᴇx Lɪɴᴋ</a></b>'
+                                msg += f' <b>| <a href="{siurl}">Index Link</a></b>'
                             else:
-                                msg += f' <b>| <a href="{url}">Iɴᴅᴇx Lɪɴᴋ</a></b>'
+                                msg += f' <b>| <a href="{url}">Index Link</a></b>'
                     elif file.get('mimeType') == 'application/vnd.google-apps.shortcut':
                         msg += f"⁍<a href='https://drive.google.com/drive/folders/{file.get('id')}'>{file.get('name')}" \
                             f"</a> (shortcut)"
                     else:
                         furl = f"https://drive.google.com/uc?id={file.get('id')}&export=download"
-                        msg += f"⁍<code>{file.get('name')}<br>({get_readable_file_size(int(file.get('size')))})📄</code><br>"
+                        msg += f"⁍<code>{file.get('name')}<br>({self.get_readable_file_size(int(file.get('size')))})📄</code><br>"
                         if SHORTENER is not None and SHORTENER_API is not None:
                             sfurl = requests.get('https://{}/api?api={}&url={}&format=text'.format(SHORTENER, SHORTENER_API, furl)).text
-                            msg += f"<b><a href={sfurl}>Dʀɪᴠᴇ Lɪɴᴋ</a></b>"
+                            msg += f"<b><a href={sfurl}>Drive Link</a></b>"
                         else:
-                            msg += f"<b><a href={furl}>Dʀɪᴠᴇ Lɪɴᴋ</a></b>"
+                            msg += f"<b><a href={furl}>Drive Link</a></b>"
                         if INDEX_URLS[INDEX] is not None:
                             url_path = requests.utils.quote(f'{file.get("name")}')
-                            url = f'{INDEX_URLS[INDEX]}/{url_path}'
+                            url = f'{INDEX_URLS[INDEX]}/{url_path}?a=view'
                             if SHORTENER is not None and SHORTENER_API is not None:
                                 siurl = requests.get('https://{}/api?api={}&url={}&format=text'.format(SHORTENER, SHORTENER_API, url)).text
-                                msg += f' <b>| <a href="{siurl}">Iɴᴅᴇx Lɪɴᴋ</a></b>'
+                                msg += f' <b>| <a href="{siurl}">Index Link</a></b>'
                             else:
-                                msg += f' <b>| <a href="{url}">Iɴᴅᴇx Lɪɴᴋ</a></b>'
+                                msg += f' <b>| <a href="{url}">Index Link</a></b>'
                     msg += '<br><br>'
                     content_count += 1
                     if content_count == TELEGRAPHLIMIT :
                        self.telegraph_content.append(msg)
-                       msg = f'<h4><img src="{IMAGE_URL}" />🔎 Sᴇᴀʀᴄʜ Rᴇsᴜʟᴛs Fᴏʀ Yᴏᴜʀ Kᴇʏᴡᴏʀᴅ : {fileName}</h4><br><b><a href="https://t.me/jusidama">@Jusidama #Search-Index</a></b><br><br><b><a href="https://groups.google.com/g/jusidama-folder">Join Our Team Drive</a> | <a href="https://index.juicedama.workers.dev">Index Multi Drive</a></b><br><br>'
+                       msg = f'<h4><img src="{IMAGE_URL}" />🔎 Search Results for : {fileName}</h4>\n<b><a href="https://t.me/jusidama">@Jusidama #Search-Index</a></b>\n\n<b><a href="https://groups.google.com/g/jusidama-folder">Join Our Team Drive</a> | <a href="https://index.juicedama.workers.dev">Index Multi Drive</a></b>\n\n'
                        content_count = 0
                     
             if msg != '':
@@ -663,7 +663,7 @@ class GoogleDriveHelper:
                                                         html_content=content
                                                         )['path'])
 
-            self.num_of_path = len(self.path)
+            self.num_of_path = len(self.path)      
             if self.num_of_path > 1:
                 self.edit_telegraph()
 
