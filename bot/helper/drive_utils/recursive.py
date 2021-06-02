@@ -24,7 +24,7 @@ telegra_ph = Telegraph(access_token=telegraph_token)
 
 class GoogleDriveHelper:
     def __init__(self, name=None, listener=None):
-        self.__G_DRIVE_TOKEN_FILE = "token.pickle"
+        self.__G_DRIVE_TOKEN_FILE = "recursive_token.pickle"
         # Check https://developers.google.com/drive/scopes for all available scopes
         self.__OAUTH_SCOPE = ['https://www.googleapis.com/auth/drive']
         self.__service = self.authorize()

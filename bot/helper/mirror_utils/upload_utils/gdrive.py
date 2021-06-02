@@ -32,7 +32,7 @@ SERVICE_ACCOUNT_INDEX = 0
 TELEGRAPHLIMIT = 95
 
 class GoogleDriveHelper:
-    def __init__(self, name=None, listener=None):
+    def __init__(self, name=None, listener=None, GFolder_ID=parent_id):
         self.__G_DRIVE_TOKEN_FILE = "token.pickle"
         # Check https://developers.google.com/drive/scopes for all available scopes
         self.__OAUTH_SCOPE = ['https://www.googleapis.com/auth/drive']
@@ -58,6 +58,10 @@ class GoogleDriveHelper:
         self.update_interval = 3
         self.telegraph_content = []
         self.path = []
+        if not len(GFolder_ID) == 33 or not len(GFolder_ID) == 19:
+            self.gparentid = self.getIdFromUrl(GFolder_ID)
+        else:
+            self.gparentid = GFolder_ID
 
     def cancel(self):
         self.is_cancelled = True
@@ -321,9 +325,25 @@ class GoogleDriveHelper:
         LOGGER.info(f"File ID: {file_id}")
         try:
             meta = self.getFileMetadata(file_id)
+            dest_meta = self.__service.files().get(supportsAllDrives=True, fileId=self.gparentid,
+                                              fields="name,id,size").execute()
+            status.SetMainFolder(meta.get('name'), self.__G_DRIVE_DIR_BASE_DOWNLOAD_URL.format(meta.get('id')))
+            status.SetDestinationFolder(dest_meta.get('name'), self.__G_DRIVE_DIR_BASE_DOWNLOAD_URL.format(dest_meta.get('id')))
             if meta.get("mimeType") == self.__G_DRIVE_DIR_MIME_TYPE:
-                dir_id = self.create_directory(meta.get('name'), parent_id)
-                result = self.cloneFolder(meta.get('name'), meta.get('name'), meta.get('id'), dir_id)
+                dir_id = self.check_folder_exists(meta.get('name'), self.gparentid)
+                if not dir_id:
+                    dir_id = self.create_directory(meta.get('name'), self.gparentid)
+                try:
+                    self.cloneFolder(meta.get('name'), meta.get('name'), meta.get('id'), dir_id, status, ignoreList)
+                except Exception as e:
+                    if isinstance(e, RetryError):
+                        LOGGER.info(f"Total Attempts: {e.last_attempt.attempt_number}")
+                        err = e.last_attempt.exception()
+                    else:
+                        err = str(e).replace('>', '').replace('<', '')
+                    LOGGER.error(err)
+                    return err
+                status.set_status(True)
                 msg += f'<b>Filename: </b><code>{meta.get("name")}</code>\n<b>Size: </b><code>{get_readable_file_size(self.transferred_size)}</code>'
                 msg += f'\n\n<b>Type: </b>Folder'
                 msg += f'\n<b>SubFolders: </b>{self.total_folders}'
@@ -350,7 +370,21 @@ class GoogleDriveHelper:
                 if BUTTON_FIVE_NAME is not None and BUTTON_FIVE_URL is not None:
                     buttons.buildbutton(f"{BUTTON_FIVE_NAME}", f"{BUTTON_FIVE_URL}")
             else:
-                file = self.copyFile(meta.get('id'), parent_id)
+                try:
+                    file = self.check_file_exists(meta.get('id'), self.gparentid)
+                    if file:
+                        status.checkFileExist(True)
+                    if not file:
+                        status.checkFileExist(False)
+                        file = self.copyFile(meta.get('id'), self.gparentid, status)
+                except Exception as e:
+                    if isinstance(e, RetryError):
+                        LOGGER.info(f"Total Attempts: {e.last_attempt.attempt_number}")
+                        err = e.last_attempt.exception()
+                    else:
+                        err = str(e).replace('>', '').replace('<', '')
+                    LOGGER.error(err)
+                    return err
                 msg += f'<b>Filename: </b><code>{file.get("name")}</code>'
                 durl = self.__G_DRIVE_BASE_DOWNLOAD_URL.format(file.get("id"))
                 buttons = button_build.ButtonMaker()
@@ -395,27 +429,49 @@ class GoogleDriveHelper:
             return err, ""
         return msg, InlineKeyboardMarkup(buttons.build_menu(2))
 
-    def cloneFolder(self, name, local_path, folder_id, parent_id):
+    def cloneFolder(self, name, local_path, folder_id, parent_id, status, ignoreList=[]):
+        page_token = None
+        q = f"'{folder_id}' in parents"
+        files = []
         LOGGER.info(f"Syncing: {local_path}")
-        files = self.getFilesByFolderId(folder_id)
-        new_id = None
+        while True:
+            response = self.__service.files().list(supportsTeamDrives=True,
+                                                   includeTeamDriveItems=True,
+                                                   q=q,
+                                                   spaces='drive',
+                                                   fields='nextPageToken, files(id, name, mimeType,size)',
+                                                   pageToken=page_token).execute()
+            for file in response.get('files', []):
+                files.append(file)
+            page_token = response.get('nextPageToken', None)
+            if page_token is None:
+                break
         if len(files) == 0:
             return parent_id
         for file in files:
             if file.get('mimeType') == self.__G_DRIVE_DIR_MIME_TYPE:
                 self.total_folders += 1
                 file_path = os.path.join(local_path, file.get('name'))
-                current_dir_id = self.create_directory(file.get('name'), parent_id)
-                new_id = self.cloneFolder(file.get('name'), file_path, file.get('id'), current_dir_id)
+                current_dir_id = self.check_folder_exists(file.get('name'), parent_id)
+                if not current_dir_id:
+                    current_dir_id = self.create_directory(file.get('name'), parent_id)
+                if not str(file.get('id')) in ignoreList:
+                    self.cloneFolder(file.get('name'), file_path, file.get('id'), current_dir_id, status, ignoreList)
+                else:
+                    LOGGER.info("Ignoring FolderID from clone: " + str(file.get('id')))
             else:
                 try:
-                    self.total_files += 1
-                    self.transferred_size += int(file.get('size'))
+                    if not self.check_file_exists(file.get('name'), parent_id):
+                        status.checkFileExist(False)
+                        self.copyFile(file.get('id'), parent_id, status)
+                        self.total_files += 1
+                        self.transferred_size += int(file.get('size'))
+                        status.set_name(file.get('name'))
+                        status.add_size(int(file.get('size')))
+                    else:
+                        status.checkFileExist(True)
                 except TypeError:
                     pass
-                try:
-                    self.copyFile(file.get('id'), parent_id)
-                    new_id = parent_id
                 except Exception as e:
                     if isinstance(e, RetryError):
                         LOGGER.info(f"Total Attempts: {e.last_attempt.attempt_number}")
@@ -423,7 +479,6 @@ class GoogleDriveHelper:
                     else:
                         err = e
                     LOGGER.error(err)
-        return new_id
 
     @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(5),
            retry=retry_if_exception_type(HttpError), before=before_log(LOGGER, logging.DEBUG))
@@ -440,6 +495,43 @@ class GoogleDriveHelper:
             self.__set_permission(file_id)
         LOGGER.info("Created Google-Drive Folder:\nName: {}\nID: {} ".format(file.get("name"), file_id))
         return file_id
+
+        @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(15),
+           retry=retry_if_exception_type(HttpError), before=before_log(LOGGER, logging.DEBUG))
+    def check_folder_exists(self, fileName, u_parent_id):
+        fileName = clean_name(fileName)
+        # Create Search Query for API request.
+        query = f"'{u_parent_id}' in parents and (name contains '{fileName}' and trashed=false)"
+        response = self.__service.files().list(supportsTeamDrives=True,
+                                               includeTeamDriveItems=True,
+                                               q=query,
+                                               spaces='drive',
+                                               pageSize=5,
+                                               fields='files(id, name, mimeType, size)',
+                                               orderBy='modifiedTime desc').execute()
+        for file in response.get('files', []):
+            if file.get('mimeType') == "application/vnd.google-apps.folder":  # Detect Whether Current Entity is a Folder or File.
+                    driveid = file.get('id')
+                    return driveid
+    
+    @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(15),
+           retry=retry_if_exception_type(HttpError), before=before_log(LOGGER, logging.DEBUG))
+    def check_file_exists(self, fileName, u_parent_id):
+        fileName = clean_name(fileName)
+        # Create Search Query for API request.
+        query = f"'{u_parent_id}' in parents and (name contains '{fileName}' and trashed=false)"
+        response = self.__service.files().list(supportsTeamDrives=True,
+                                               includeTeamDriveItems=True,
+                                               q=query,
+                                               spaces='drive',
+                                               pageSize=5,
+                                               fields='files(id, name, mimeType, size)',
+                                               orderBy='modifiedTime desc').execute()
+        for file in response.get('files', []):
+            if file.get('mimeType') != "application/vnd.google-apps.folder":
+                    # driveid = file.get('id')
+                    return file
+
 
     def upload_dir(self, input_directory, parent_id):
         list_dirs = os.listdir(input_directory)

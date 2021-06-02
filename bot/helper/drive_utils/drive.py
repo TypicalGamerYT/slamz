@@ -6,7 +6,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from bot import DRIVE_NAME, DRIVE_ID, INDEX_URLS
+from bot import DRIVE_IDS, INDEX_URLS
 
 
 SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -68,7 +68,7 @@ class GoogleDriveHelper:
         msg = ''
         data = []
         INDEX = -1
-        for parent_id in DRIVE_ID:
+        for parent_id in DRIVE_IDS:
             response = self.drive_query(parent_id, fileName)
             INDEX += 1
             for file in response:
