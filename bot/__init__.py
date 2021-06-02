@@ -93,6 +93,29 @@ if DRIVE_IDS :
 
 #### FOR NON RECURSIVE SEARCH
 
+#### FOR RECURSIVE SEARCH
+
+R_DRIVE_NAMES = []
+R_DRIVE_IDS = []
+R_INDEX_URLS = []
+
+if os.path.exists('drive_folderz'):
+    with open('drive_folderz', 'r+') as f:
+        lines = f.readlines()
+        for line in lines:
+            temp = line.strip().split()
+            R_DRIVE_NAMES.append(temp[0].replace("_", " "))
+            R_DRIVE_IDS.append(temp[1])
+            try:
+                R_INDEX_URLS.append(temp[2])
+            except IndexError as e:
+                R_INDEX_URLS.append(None)
+
+if R_DRIVE_IDS :
+    pass
+
+#### FOR RECURSIVE SEARCH
+
 # Aiohttp Client
 print("[INFO]: INITIALZING AIOHTTP SESSION")
 aiohttpsession = ClientSession()
