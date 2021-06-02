@@ -5,6 +5,7 @@ import time
 import random
 import string
 import aiohttp
+import asyncio
 
 import aria2p
 import telegram.ext as tg
@@ -124,6 +125,9 @@ session = aiohttp.ClientSession()
 # ARQ client
 print("[INFO]: INITIALIZING ARQ")
 arq = ARQ(ARQ_API_URL, ARQ_API_KEY, session)
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(getConfig())
 
 def getConfig(name: str):
     return os.environ[name]
