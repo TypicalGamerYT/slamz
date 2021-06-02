@@ -375,11 +375,11 @@ class GoogleDriveHelper:
                     if SHORTENER is not None and SHORTENER_API is not None:
                         siurl = requests.get(f'https://{SHORTENER}/api?api={SHORTENER_API}&url={url}&format=text').text
                         siurls = requests.get(f'https://{SHORTENER}/api?api={SHORTENER_API}&url={urls}&format=text').text
-                        buttons.buildbutton("⚡Index Link⚡", siurl)
-                        buttons.buildbutton("🌐View Link🌐", siurls)
+                        buttons.buildbutton("⚡Index Link⚡", siurls)
+                        #buttons.buildbutton("🌐View Link🌐", siurls)
                     else:
-                        buttons.buildbutton("⚡Index Link⚡", url)
-                        buttons.buildbutton("🌐View Link🌐", urls)
+                        buttons.buildbutton("⚡Index Link⚡", urls)
+                        #buttons.buildbutton("🌐View Link🌐", urls)
                 if BUTTON_THREE_NAME is not None and BUTTON_THREE_URL is not None:
                     buttons.buildbutton(f"{BUTTON_THREE_NAME}", f"{BUTTON_THREE_URL}")
                 if BUTTON_FOUR_NAME is not None and BUTTON_FOUR_URL is not None:

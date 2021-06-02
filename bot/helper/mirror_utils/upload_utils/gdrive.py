@@ -314,7 +314,7 @@ class GoogleDriveHelper:
                 break
         return files
 
-    def clone(self, link):
+    def clone(self, link, status, ignoreList=[]):
         self.transferred_size = 0
         self.total_files = 0
         self.total_folders = 0
