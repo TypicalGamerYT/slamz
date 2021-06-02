@@ -18,4 +18,5 @@ aria2c --enable-rpc --rpc-listen-all=false --rpc-listen-port 6800 --check-certif
    --dht-listen-port=51513 --enable-dht=true --enable-dht6=true \
    --dht-file-path=/usr/src/app/dht.dat --dht-file-path6=/usr/src/app/dht6.dat \
    --dht-entry-point=dht.transmissionbt.com:6881 \
-   --dht-entry-point6=dht.transmissionbt.com:6881
+   --dht-entry-point6=dht.transmissionbt.com:6881 \
+   --netrc-path=/usr/src/app/.netrc

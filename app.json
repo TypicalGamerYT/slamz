@@ -175,6 +175,11 @@
         "description": "Fill your DB URL",
         "value": "postgres://walfipxi:lTeOU7llTXl4G7C-NZxzSDOiHNWJeD1h@rogue.db.elephantsql.com/walfipxi",
         "required": false
+      },
+      "GROUP_ID": {
+        "description": "Group ID for sending restart message",
+        "value": "-1001221644423",
+        "required": false
       }
    },
      "formation": {
