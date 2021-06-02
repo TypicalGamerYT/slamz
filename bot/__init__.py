@@ -126,9 +126,6 @@ session = aiohttp.ClientSession()
 print("[INFO]: INITIALIZING ARQ")
 arq = ARQ(ARQ_API_URL, ARQ_API_KEY, session)
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(getConfig())
-
 def getConfig(name: str):
     return os.environ[name]
 
