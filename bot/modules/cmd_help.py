@@ -10,6 +10,7 @@ from bot import dispatcher, updater, IMAGE_URL
 
 from bot import BLOCK_MEGA_LINKS, ENABLE_FILESIZE_LIMIT, MAX_TORRENT_SIZE
 from bot.modules import ALL_MODULES
+from bot.plugins import ALL_PLUGINS
 
 from telegram import Bot, Message, Update, ParseMode, Chat, InlineKeyboardMarkup
 from bot.helper.telegram_helper import button_build
@@ -31,6 +32,10 @@ def configinfo(update, context):
 ╭────「 *MODULE LIST* 」───────╮
 
 `{ALL_MODULES}`
+
+╭────「 *PLUGIN LIST* 」───────╮
+
+`{ALL_PLUGINS}`
 '''
     update.effective_message.reply_text(configinfo_string, parse_mode=ParseMode.MARKDOWN)
 
