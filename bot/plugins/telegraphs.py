@@ -9,7 +9,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telegraph import upload_file
 
 from bot import app
-from bot.modules.others.errors import capture_err
+from bot.plugins.others.errors import capture_err
 
 
 @app.on_message(filters.command("tgphoto"))
