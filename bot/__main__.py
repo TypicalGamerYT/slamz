@@ -32,8 +32,8 @@ for module in ALL_MODULES:
     imported_module = importlib.import_module("bot.modules." + module)
     importlib.reload(imported_module)
 
-for plugins in ALL_PLUGINS:
-    imported_plugins = importlib.import_module("bot.plugins." + module)
+for plugin in ALL_PLUGINS:
+    imported_plugins = importlib.import_module("bot.plugins." + plugin)
     importlib.reload(imported_plugins)
 
 now=datetime.now(pytz.timezone('Asia/Jakarta'))
