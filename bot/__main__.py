@@ -1,11 +1,12 @@
 import shutil, psutil
 import signal
 import importlib
-
+#import pickle
+import os
 from pyrogram import idle
 
-from bot import app
-
+from bot import app, bot
+#from os import execl, kill, path, remove
 from sys import executable
 from datetime import datetime
 import pytz
@@ -13,12 +14,17 @@ import datetime
 from datetime import datetime
 from telegram import ParseMode, BotCommand, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CommandHandler, run_async
-from bot import bot, dispatcher, updater, botStartTime, AUTHORIZED_CHATS, IMAGE_URL
+from telegram.error import BadRequest, Unauthorized
+
+from bot import dispatcher, updater, botStartTime, IMAGE_URL, GROUP_ID
+from bot import bot
+
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
-from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
-from .helper.telegram_helper.filters import CustomFilters
+
+from bot.helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
+from bot.helper.telegram_helper.filters import CustomFilters
 from bot.modules import ALL_MODULES
 from bot.plugins import ALL_PLUGINS
 
@@ -96,6 +102,7 @@ BotCommand(f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
 BotCommand(f'{BotCommands.TarMirrorCommand}','Upload tar (zipped) file'),
 BotCommand(f'{BotCommands.UnzipMirrorCommand}','Extract files'),
 BotCommand(f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
+BotCommand(f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
 BotCommand(f'{BotCommands.WatchCommand}','Mirror YT-DL support link'),
 BotCommand(f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as tar'),
 BotCommand(f'{BotCommands.CancelMirror}','Cancel a task'),
@@ -119,11 +126,24 @@ def main():
     current = now.strftime('%Y/%m/%d %I:%M:%P')
     fs_utils.start_cleanup()
     # Check if the bot is restarting
+
+    if GROUP_ID is not None and isinstance(GROUP_ID, str):
+        try:
+            dispatcher.bot.sendMessage(f"From Group with ID <code>{GROUP_ID}</code> ", "Bot Restarted Successfully!\n\nBot Start : {current}")
+
+        except Unauthorized:
+            LOGGER.warning("Bot isn't able to send message to support chat, go and check!")
+
+        except BadRequest as e:
+            LOGGER.warning(e.message)
+
     if os.path.isfile(".restartmsg"):
         with open(".restartmsg") as f:
             chat_id, msg_id = map(int, f)
-        bot.edit_message_text(f"Restarted Successfully !\n"f"\nBot Start : {current}", chat_id, msg_id)
+        bot.edit_message_text("Restarted successfully!", chat_id, msg_id)
         os.remove(".restartmsg")
+
+    bot.set_my_commands(botcmds)
 
     start_handler = CommandHandler(BotCommands.StartCommand, start,
                                    filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)

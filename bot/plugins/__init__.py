@@ -1,4 +1,5 @@
 '''Methods Directory.'''
+# Plugins folder for modules using Pyrogram.
 
 def __list_all_plugins():
     from os.path import dirname, basename, isfile
@@ -12,5 +13,5 @@ def __list_all_plugins():
         ]
 
 
-ALL_PLUGINS = sorted(__list_all_modules())
+ALL_PLUGINS = sorted(__list_all_plugins())
 __all__ = ALL_PLUGINS + ["ALL_PLUGINS"]

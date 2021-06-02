@@ -41,7 +41,9 @@ Interval = []
 ARQ_API_URL = "https://thearq.tech" #Default URL.
 ARQ_API_KEY = "MUTWXW-IOSFCI-AYCOHO-KXJNLI-ARQ" #Get this from @ARQRobot.
 
-DRIVE_NAME = [
+#### FOR NON RECURSIVE SEARCH
+
+DRIVE_NAMES = [
     "Current Drive",
     "Main Data 0",  # folder 1 name
     "Main Data 1",  # folder 2 name
@@ -52,7 +54,7 @@ DRIVE_NAME = [
     "Aulia Index"  # and soo onnnn folder n names
 ]
 
-DRIVE_ID = [
+DRIVE_IDS = [
     "0AEi4wTsML7qxUk9PVA",
     "1sQOTUg0OrRh-WY8JoLNgYmdePE0oLjSN",  # folder 1 id
     "1uODcU-1OWCmKZ40XxNkzeJvR3VlVtoSY",  # folder 2 id
@@ -73,6 +75,23 @@ INDEX_URLS = [
     "https://md5.juicedama.workers.dev/5:",
     "https://auliachan.crysriski12.workers.dev/0:"
 ]
+
+if os.path.exists('drive_folders'):
+    with open('drive_folders', 'r+') as f:
+        lines = f.readlines()
+        for line in lines:
+            temp = line.strip().split()
+            DRIVE_NAMES.append(temp[0].replace("_", " "))
+            DRIVE_IDS.append(temp[1])
+            try:
+                INDEX_URLS.append(temp[2])
+            except IndexError as e:
+                INDEX_URLS.append(None)
+
+if DRIVE_IDS :
+    pass
+
+#### FOR NON RECURSIVE SEARCH
 
 # Aiohttp Client
 print("[INFO]: INITIALZING AIOHTTP SESSION")
@@ -139,7 +158,7 @@ except:
 
 try:
     BOT_TOKEN = getConfig('BOT_TOKEN')
-    DB_URI = os.environ.get("DATABASE_URL")
+    DB_URI = getConfig("DATABASE_URL")
     parent_id = getConfig('GDRIVE_FOLDER_ID')
     DOWNLOAD_DIR = getConfig('DOWNLOAD_DIR')
     if not DOWNLOAD_DIR.endswith("/"):
@@ -149,6 +168,7 @@ try:
     AUTO_DELETE_MESSAGE_DURATION = int(getConfig('AUTO_DELETE_MESSAGE_DURATION'))
     TELEGRAM_API = getConfig('TELEGRAM_API')
     TELEGRAM_HASH = getConfig('TELEGRAM_HASH')
+    GROUP_ID = getConfig("GROUP_ID")
 except KeyError as e:
     LOGGER.error("One or more env variables missing! Exiting now")
     exit(1)

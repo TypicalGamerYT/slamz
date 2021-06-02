@@ -1,4 +1,5 @@
 '''Methods Directory.'''
+# Plugins folder for modules using Telegram.
 
 def __list_all_modules():
     from os.path import dirname, basename, isfile
