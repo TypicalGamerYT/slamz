@@ -4,15 +4,16 @@ import threading
 import time
 import random
 import string
+import aiohttp
 
 import aria2p
 import telegram.ext as tg
+
 from dotenv import load_dotenv
 from pyrogram import Client
 from telegraph import Telegraph
 
 from Python_ARQ import ARQ
-from aiohttp import ClientSession
 
 import psycopg2
 from psycopg2 import Error
@@ -118,11 +119,11 @@ if R_DRIVE_IDS :
 
 # Aiohttp Client
 print("[INFO]: INITIALZING AIOHTTP SESSION")
-aiohttpsession = ClientSession()
+session = aiohttp.ClientSession()
 
 # ARQ client
 print("[INFO]: INITIALIZING ARQ")
-arq = ARQ(ARQ_API_URL, ARQ_API_KEY, aiohttpsession)
+arq = ARQ(ARQ_API_URL, ARQ_API_KEY, session)
 
 def getConfig(name: str):
     return os.environ[name]

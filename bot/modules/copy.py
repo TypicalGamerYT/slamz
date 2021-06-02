@@ -3,6 +3,7 @@ from bot.helper.mirror_utils.upload_utils.gdrive import GoogleDriveHelper
 from bot.helper.ext_utils.bot_utils import get_readable_file_size
 from bot import dispatcher
 from bot import parent_id
+from bot.helper.telegram_helper.filters import CustomFilters
 
 from telegram.error import TimedOut, BadRequest
 from bot.helper.drive_utils.clone_status import CloneStatus
@@ -13,7 +14,7 @@ GDRIVE_FOLDER_ID = parent_id
 
 # TODO Cancel Clones with /cancel command.
 @run_async
-def cloneNode(update, context):
+def copyNode(update, context):
     args = update.message.text.split(" ")
     if len(args) > 1:
         link = args[1]
@@ -66,6 +67,5 @@ def sendCloneStatus(update, context, status, msg, link):
         time.sleep(int(value))
         return
 
-    clone_handler = CommandHandler('clonebot1', cloneNode)
-    
-    dispatcher.add_handler(clone_handler)
+copy_handler = CommandHandler("copy", copyNode, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
+dispatcher.add_handler(copy_handler)
