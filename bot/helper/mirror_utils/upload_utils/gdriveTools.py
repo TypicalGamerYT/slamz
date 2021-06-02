@@ -603,7 +603,7 @@ class GoogleDriveHelper:
             INDEX += 1          
             if response:
                 if add_title_msg == True:
-                    msg = f'<h4><img src="{IMAGE_URL}" />🔎 Sᴇᴀʀᴄʜ Rᴇsᴜʟᴛs Fᴏʀ Yᴏᴜʀ Kᴇʏᴡᴏʀᴅ : {fileName}</h4>\n<b><a href="https://t.me/jusidama">@Jusidama #Search-Index</a></b>\n\n<b><a href="https://groups.google.com/g/jusidama-folder">Join Our Team Drive</a> | <a href="https://index.juicedama.workers.dev">Index Multi Drive</a></b>\n\n'
+                    msg = f'<h4><img src="{IMAGE_URL}" />🔎 Sᴇᴀʀᴄʜ Rᴇsᴜʟᴛs Fᴏʀ Yᴏᴜʀ Kᴇʏᴡᴏʀᴅ : {fileName}</h4><br><b><a href="https://t.me/jusidama">@Jusidama #Search-Index</a></b><br><br><b><a href="https://groups.google.com/g/jusidama-folder">Join Our Team Drive</a> | <a href="https://index.juicedama.workers.dev">Index Multi Drive</a></b><br><br>'
                     add_title_msg = False
                 msg += f"╾────────────╼<br><b>{DRIVE_NAMES[INDEX]}</b><br>╾────────────╼<br>"
                 for file in response:
@@ -646,7 +646,7 @@ class GoogleDriveHelper:
                     content_count += 1
                     if content_count == TELEGRAPHLIMIT :
                        self.telegraph_content.append(msg)
-                       msg = f'<h4><img src="{IMAGE_URL}" />🔎 Sᴇᴀʀᴄʜ Rᴇsᴜʟᴛs Fᴏʀ Yᴏᴜʀ Kᴇʏᴡᴏʀᴅ : {fileName}</h4>\n<b><a href="https://t.me/jusidama">@Jusidama #Search-Index</a></b>\n\n<b><a href="https://groups.google.com/g/jusidama-folder">Join Our Team Drive</a> | <a href="https://index.juicedama.workers.dev">Index Multi Drive</a></b>\n\n'
+                       msg = f'<h4><img src="{IMAGE_URL}" />🔎 Sᴇᴀʀᴄʜ Rᴇsᴜʟᴛs Fᴏʀ Yᴏᴜʀ Kᴇʏᴡᴏʀᴅ : {fileName}</h4><br><b><a href="https://t.me/jusidama">@Jusidama #Search-Index</a></b><br><br><b><a href="https://groups.google.com/g/jusidama-folder">Join Our Team Drive</a> | <a href="https://index.juicedama.workers.dev">Index Multi Drive</a></b><br><br>'
                        content_count = 0
                     
             if msg != '':
