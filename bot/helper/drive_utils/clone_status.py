@@ -1,4 +1,4 @@
-from bot.helper.ext_utils import get_readable_file_size
+from bot.helper.ext_utils.bot_utils import get_readable_file_size
 
 class CloneStatus:
     def __init__(self, size=0):
