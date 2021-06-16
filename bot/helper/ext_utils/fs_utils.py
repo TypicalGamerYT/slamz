@@ -71,6 +71,8 @@ def get_base_name(orig_path: str):
         return orig_path.replace(".gz", "")
     elif orig_path.endswith(".tar"):
         return orig_path.replace(".tar", "")
+    elif orig_path.endswith(".tar.xz"):
+        return orig_path.replace(".tar.xz", "")
     elif orig_path.endswith(".tbz2"):
         return orig_path.replace("tbz2", "")
     elif orig_path.endswith(".tgz"):

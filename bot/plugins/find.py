@@ -2,7 +2,7 @@ import os
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from bot.helper.drive_utils.drive import drive
-from bot import app
+from bot import app, AUTHORIZED_CHATS
 from requests import get as g
 
 RESULTS_COUNT = 5
@@ -14,11 +14,11 @@ keyboard = None
 data = None
 
 
-@app.on_message(filters.command(["findhelp"]))
+@app.on_message(filters.command(["findhelp"]) & filters.chat(AUTHORIZED_CHATS))
 async def start_command(_, message):
     await message.reply_text("What did you expect to happen? Try /find [Query]")
 
-@app.on_message(filters.command(["find"]))
+@app.on_message(filters.command(["look"]) & filters.chat(AUTHORIZED_CHATS))
 async def search(_, message):
     global i, m, data
     m = await message.reply_text("**Searching....**")

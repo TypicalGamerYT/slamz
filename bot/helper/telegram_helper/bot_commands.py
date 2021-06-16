@@ -31,5 +31,5 @@ class _BotCommands:
         self.SearchHelpCommand = 'tshelp'
         self.WeebHelpCommand = 'weebhelp'
         self.StickerHelpCommand = 'stickerhelp'
-
+        self.MediaInfoCommand = 'mediainfo'
 BotCommands = _BotCommands()

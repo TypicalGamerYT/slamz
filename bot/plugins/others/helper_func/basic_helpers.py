@@ -19,6 +19,7 @@ from math import ceil
 from traceback import format_exc
 from typing import Tuple
 
+from html_telegraph_poster import TelegraphPoster
 from pyrogram import Client
 from pyrogram.errors import FloodWait, MessageNotModified
 from pyrogram.types import (
@@ -424,3 +425,25 @@ async def convert_to_image(message, client) -> [None, str]:
         vid_path = await client.download_media(message.reply_to_message)
         await run_cmd(f"ffmpeg -i {vid_path} -filter:v scale=500:500 -an {final_path}")
     return final_path
+
+def post_to_telegraph(a_title: str, content: str) -> str:
+    """ Create a Telegram Post using HTML Content """
+    post_client = TelegraphPoster(use_api=True)
+    auth_name = "Jusidama"
+    post_client.create_api_token(auth_name)
+    post_page = post_client.post(
+        title=a_title,
+        author=auth_name,
+        author_url="https://t.me/Jusidama",
+        text=content,
+    )
+    return post_page["url"]
+
+# Solves ValueError: No closing quotation by removing ' or " in file name
+def safe_filename(path_):
+    if path_ is None:
+        return
+    safename = path_.replace("'", "").replace('"', "")
+    if safename != path_:
+        os.rename(path_, safename)
+    return safename

@@ -56,3 +56,4 @@ maigret
 countryinfo
 emoji-country-flag
 spotdl
+lk21

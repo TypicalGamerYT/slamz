@@ -45,38 +45,11 @@ ARQ_API_KEY = "MUTWXW-IOSFCI-AYCOHO-KXJNLI-ARQ" #Get this from @ARQRobot.
 
 #### FOR NON RECURSIVE SEARCH
 
-DRIVE_NAMES = [
-    "Current Drive",
-    "Main Data 0",  # folder 1 name
-    "Main Data 1",  # folder 2 name
-    "Main Data 2",  # folder 3 name
-    "Main Data 3",  # ....
-    "Main Data 4",  # ......
-    "Main Data 5",
-    "Aulia Index"  # and soo onnnn folder n names
-]
+DRIVE_NAMES = []
 
-DRIVE_IDS = [
-    "0AEi4wTsML7qxUk9PVA",
-    "1sQOTUg0OrRh-WY8JoLNgYmdePE0oLjSN",  # folder 1 id
-    "1uODcU-1OWCmKZ40XxNkzeJvR3VlVtoSY",  # folder 2 id
-    "10Mujqdc8qdVW1JYpv7zIDkFvrn3-X2Vr",  # and so onn... folder n id
-    "18p8QAbCfqNPXNGkyWqOP2IsI31Q5y5Hi",
-    "1vgabcaxjP96H87v12HOg3iFCP-ioN6wb",
-    "1ya7SyXL1yjXltR-B8BPAw8YBNywnCE1h",
-    "13k-FjJJvfR_Btcwd10zEOmqMEUl5bVlw"
-]
+DRIVE_IDS = []
 
-INDEX_URLS = [
-    "https://database.juicedama.workers.dev/7:",
-    "https://md5.juicedama.workers.dev/0:",  # folder 1 index link
-    "https://md5.juicedama.workers.dev/1:",  # folder 2 index link
-    "https://md5.juicedama.workers.dev/2:",  # and soo on folder n link
-    "https://md5.juicedama.workers.dev/3:",
-    "https://md5.juicedama.workers.dev/4:",
-    "https://md5.juicedama.workers.dev/5:",
-    "https://auliachan.crysriski12.workers.dev/0:"
-]
+INDEX_URLS = []
 
 if os.path.exists('drive_folders'):
     with open('drive_folders', 'r+') as f:
@@ -193,7 +166,7 @@ try:
     AUTO_DELETE_MESSAGE_DURATION = int(getConfig('AUTO_DELETE_MESSAGE_DURATION'))
     TELEGRAM_API = getConfig('TELEGRAM_API')
     TELEGRAM_HASH = getConfig('TELEGRAM_HASH')
-    GROUP_ID = getConfig('GROUP_ID', '-1001221644423')
+    GROUP_ID = getConfig('GROUP_ID')
 except KeyError as e:
     LOGGER.error("One or more env variables missing! Exiting now")
     exit(1)
@@ -271,17 +244,11 @@ except KeyError:
     logging.warning('HEROKU APP NAME not provided!')
     HEROKU_APP_NAME = None
 try:
-    MAX_TORRENT_SIZE = int(getConfig("MAX_TORRENT_SIZE"))
+    TORRENT_DIRECT_LIMIT = getConfig('TORRENT_DIRECT_LIMIT')
+    if len(TORRENT_DIRECT_LIMIT) == 0:
+        TORRENT_DIRECT_LIMIT = None
 except KeyError:
-    MAX_TORRENT_SIZE = None
-try:
-   ENABLE_FILESIZE_LIMIT = getConfig('ENABLE_FILESIZE_LIMIT')
-   if ENABLE_FILESIZE_LIMIT.lower() == 'true':
-       ENABLE_FILESIZE_LIMIT = True
-   else:
-       ENABLE_FILESIZE_LIMIT = False
-except KeyError:
-    ENABLE_FILESIZE_LIMIT = False
+    TORRENT_DIRECT_LIMIT = None
 try:
     UPTOBOX_TOKEN = getConfig('UPTOBOX_TOKEN')
 except KeyError:
@@ -293,6 +260,12 @@ try:
         INDEX_URL = None
 except KeyError:
     INDEX_URL = None
+try:
+    CLONE_LIMIT = getConfig('CLONE_LIMIT')
+    if len(CLONE_LIMIT) == 0:
+        CLONE_LIMIT = None
+except KeyError:
+    CLONE_LIMIT = None
 try:
     BUTTON_THREE_NAME = getConfig('BUTTON_THREE_NAME')
     BUTTON_THREE_URL = getConfig('BUTTON_THREE_URL')
@@ -325,6 +298,14 @@ try:
         STOP_DUPLICATE_MIRROR = False
 except KeyError:
     STOP_DUPLICATE_MIRROR = False
+try:
+    STOP_DUPLICATE_CLONE = getConfig('STOP_DUPLICATE_CLONE')
+    if STOP_DUPLICATE_CLONE.lower() == 'true':
+        STOP_DUPLICATE_CLONE = True
+    else:
+        STOP_DUPLICATE_CLONE = False
+except KeyError:
+    STOP_DUPLICATE_CLONE = False
 try:
     IS_TEAM_DRIVE = getConfig('IS_TEAM_DRIVE')
     if IS_TEAM_DRIVE.lower() == 'true':
@@ -359,6 +340,8 @@ except KeyError:
     SHORTENER_API = None
 try:
     IMAGE_URL = getConfig('IMAGE_URL')
+    if len(IMAGE_URL) == 0:
+        IMAGE_URL = 'https://telegra.ph/file/89a98d9634d296e516961.jpg'
 except KeyError:
     IMAGE_URL = 'https://telegra.ph/file/db03910496f06094f1f7a.jpg'
 

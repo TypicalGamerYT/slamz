@@ -4,11 +4,11 @@ import requests
 
 from pyrogram import filters # for github pyro, delete this with github pyro code
 
-from bot import app # for github pyro, delete this with github pyro code
+from bot import app, AUTHORIZED_CHATS # for github pyro, delete this with github pyro code
 from bot.plugins.others.errors import capture_err # for github pyro, delete this with github pyro code
 
 
-@app.on_message(filters.command('github'))
+@app.on_message(filters.command(['github', 'git'])  & filters.chat(AUTHORIZED_CHATS))
 @capture_err
 async def github(_, message):
     if len(message.command) != 2:

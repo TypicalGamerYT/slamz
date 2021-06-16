@@ -8,11 +8,11 @@ from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton 
 from telegraph import upload_file
 
-from bot import app
+from bot import app, AUTHORIZED_CHATS
 from bot.plugins.others.errors import capture_err
 
 
-@app.on_message(filters.command("tgphoto"))
+@app.on_message(filters.command("tgphoto")  & filters.chat(AUTHORIZED_CHATS))
 @capture_err
 async def tgphoto(client, message):
     if not message.reply_to_message:
@@ -35,7 +35,7 @@ async def tgphoto(client, message):
     os.remove(path)
 
 
-@app.on_message(filters.command("tgvideo"))
+@app.on_message(filters.command("tgvideo") & filters.chat(AUTHORIZED_CHATS))
 @capture_err
 async def tgvideo(client, message):
     if not message.reply_to_message:

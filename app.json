@@ -121,9 +121,17 @@
         "value": "100",
         "required": false
       },
+      "CLONE_LIMIT": {
+        "description": "To limit cloning Google Drive (leave space between number and unit (tb or gb only)), examples: if you fill 1 gb it will limit 1gb.",
+        "required": false
+      },
       "STOP_DUPLICATE_MIRROR": {
-        "description": "If this field is set to True, bot will check file in drive, if it is present in drive, downloading will be stopped.",
-        "value": "True",
+        "STOP_DUPLICATE_MIRROR": {
+        "description": "If this field is set to True, bot will check file in Drive, if it is present in Drive, downloading will be stopped.",
+        "required": false
+      },
+      "STOP_DUPLICATE_CLONE": {
+        "description": "If this field is set to True, bot will check file in Drive, if it is present in Drive, cloning will be stopped.",
         "required": false
       },
       "SHORTENER": {
