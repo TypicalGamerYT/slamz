@@ -126,7 +126,6 @@
         "required": false
       },
       "STOP_DUPLICATE_MIRROR": {
-        "STOP_DUPLICATE_MIRROR": {
         "description": "If this field is set to True, bot will check file in Drive, if it is present in Drive, downloading will be stopped.",
         "required": false
       },
