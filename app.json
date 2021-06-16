@@ -108,6 +108,7 @@
       },
       "TORRENT_DIRECT_LIMIT": {
         "description": "To limit the Torrent/Direct mirror size, Leave space between number and unit. Available units is (gb or GB, tb or TB).",
+        "value": "200 gb",
         "required": false
       },
       "BLOCK_MEGA_LINKS": {
@@ -117,14 +118,17 @@
       },
       "CLONE_LIMIT": {
         "description": "To limit cloning Google Drive (leave space between number and unit (tb or gb only)), examples: if you fill 1 gb it will limit 1gb.",
+        "value": "2 tb",
         "required": false
       },
       "STOP_DUPLICATE_MIRROR": {
         "description": "If this field is set to True, bot will check file in Drive, if it is present in Drive, downloading will be stopped.",
+        "value": "true",
         "required": false
       },
       "STOP_DUPLICATE_CLONE": {
         "description": "If this field is set to True, bot will check file in Drive, if it is present in Drive, cloning will be stopped.",
+        "value": "true",
         "required": false
       },
       "SHORTENER": {
