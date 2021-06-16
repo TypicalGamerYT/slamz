@@ -4,8 +4,6 @@ import threading
 import time
 import random
 import string
-import aiohttp
-import asyncio
 
 import aria2p
 import telegram.ext as tg
@@ -13,8 +11,6 @@ import telegram.ext as tg
 from dotenv import load_dotenv
 from pyrogram import Client
 from telegraph import Telegraph
-
-from Python_ARQ import ARQ
 
 import psycopg2
 from psycopg2 import Error
@@ -91,13 +87,6 @@ if R_DRIVE_IDS :
 
 #### FOR RECURSIVE SEARCH
 
-# Aiohttp Client
-print("[INFO]: INITIALZING AIOHTTP SESSION")
-session = aiohttp.ClientSession()
-
-# ARQ client
-print("[INFO]: INITIALIZING ARQ")
-arq = ARQ(ARQ_API_URL, ARQ_API_KEY, session)
 
 def getConfig(name: str):
     return os.environ[name]
