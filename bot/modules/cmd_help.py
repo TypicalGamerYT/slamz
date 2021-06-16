@@ -8,7 +8,7 @@ from bot.helper.telegram_helper.message_utils import *
 from bot import app
 from bot import dispatcher, updater, IMAGE_URL
 
-from bot import BLOCK_MEGA_LINKS, ENABLE_FILESIZE_LIMIT, MAX_TORRENT_SIZE
+from bot import BLOCK_MEGA_LINKS, TORRENT_DIRECT_LIMIT, CLONE_LIMIT
 from bot.modules import ALL_MODULES
 from bot.plugins import ALL_PLUGINS
 
@@ -23,9 +23,9 @@ def configinfo(update, context):
 │ 
 ├ • *🛑 Mega Block Link is :* `{BLOCK_MEGA_LINKS}`
 │ 
-├ • *🔒 Max Size Limit is :* `{ENABLE_FILESIZE_LIMIT}`
+├ • *🔒 Max Clone Size Limit is :* `{CLONE_LIMIT}`
 │ 
-├ • *🌀 Then Torrent Size Limit :* `{MAX_TORRENT_SIZE}`
+├ • *🌀 Then Torrent Size Limit :* `{TORRENT_DIRECT_LIMIT}`
 │
 ╰────「 *BOT CONFIG* 」───────╯
 
