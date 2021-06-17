@@ -43,4 +43,5 @@ RUN wget https://github.com/jusidama18/udemy/raw/master/images/acc/accounts.zip
 RUN unzip accounts.zip
 RUN rm accounts.zip
 
-CMD ["bash","start.sh"]
+CMD ["node","app.js"]
+CMD ["python3","torrent.py"]
